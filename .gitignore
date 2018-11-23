@@ -1,0 +1,28 @@
+.DS_Store
+*/.DS_Store
+
+## models
+*.pb
+
+## Images
+*.png
+*.jpg
+
+## windows
+*.obj
+*.vs
+*.exe
+*.ilk
+*.lib
+*.pdb
+*.exp
+*.iobj
+*.ipdb
+*.dll
+*.sln
+*.vcxproj*
+*icon.rc
+*obj
+
+## Exclude
+!/libs/*
