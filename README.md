@@ -1,6 +1,6 @@
 # ofxTFC
 
-## Description
+### Description
 an openFrameworks wrapper for the TensorFlow C API
 
 ### Reference

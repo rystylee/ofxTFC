@@ -11,8 +11,8 @@ public:
 	void draw();
 		
 private:
-	ofFloatImage mInputImg;
-	ofFloatImage mOutputImg;
+	vector<ofFloatImage> mInputImg;
+	vector<ofFloatImage> mOutputImg;
 
 	ofDirectory mGraphPath;
 

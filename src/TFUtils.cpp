@@ -79,18 +79,20 @@ TF_Graph* loadGraphDef(const char* graphName)
 	return graph;
 }
 
-TF_Output loadOperation(TF_Graph* graph, const char* opName)
+const std::vector<TF_Output> loadOperations(TF_Graph* graph, const char* opName)
 {
-	TF_Output op = { TF_GraphOperationByName(graph, opName), 0 };
-	if (op.oper == nullptr)
+	std::vector<TF_Output> ops = { { TF_GraphOperationByName(graph, opName), 0 } };
+	for (const auto& e : ops)
 	{
-		std::cerr << "Error: Can't initialize inputOperation" << std::endl;
-		return op;
+		if (e.oper == nullptr)
+		{
+			std::cerr << "Error: Can't initialize inputOperation" << std::endl;
+		}
 	}
 
 	std::cout << "Successfully load GraphOperation" << std::endl;
 
-	return op;
+	return ops;
 }
 
 // --------------------------------------------------------
@@ -132,62 +134,27 @@ bool runSession(
 		return false;
 	}
 
-	TF_Status* status = TF_NewStatus();
-	TF_SessionOptions* ops = TF_NewSessionOptions();
-	TF_Session* sess = TF_NewSession(graph, ops, status);
-	TF_DeleteSessionOptions(ops);
+	TF_Session* sess = createSession(graph);
 
-	if (TF_GetCode(status) != TF_OK)
-	{
-		std::cerr << "Error: Can't create session" << std::endl;
-		TF_DeleteStatus(status);
-		return false;
-	}
-
-	TF_SessionRun(
+	return runSession(
 		sess,
-		nullptr, // Run options
-		inputOps, inputTensors, static_cast<int>(numInputs),
-		outputOps, outputTensors, static_cast<int>(numOutputs),
-		nullptr, 0, // Target oprations, number of targets
-		nullptr, // Run metadata
-		status // Output status
+		inputOps, inputTensors, numInputs,
+		outputOps, outputTensors, numOutputs
 	);
-
-	if (TF_GetCode(status) != TF_OK)
-	{
-		std::cerr << "Error: Can't run session" << std::endl;
-		TF_CloseSession(sess, status);
-		TF_DeleteSession(sess, status);
-		TF_DeleteStatus(status);
-		return false;
-	}
-
-	TF_CloseSession(sess, status);
-	if (TF_GetCode(status) != TF_OK)
-	{
-		std::cerr << "Error: Can't close session" << std::endl;
-		TF_CloseSession(sess, status);
-		TF_DeleteSession(sess, status);
-		TF_DeleteStatus(status);
-		return false;
-	}
-
-	TF_DeleteSession(sess, status);
-	if (TF_GetCode(status) != TF_OK)
-	{
-		std::cerr << "Error: Can't delete session" << std::endl;
-		TF_DeleteStatus(status);
-		return false;
-	}
-
-	TF_DeleteStatus(status);
-
-	return true;
 }
 
 bool runSession(
-	TF_Session* sess,
+	TF_Graph* graph,
+	const std::vector<TF_Output>& inputOps, const std::vector<TF_Tensor*>& inputTensors,
+	const std::vector<TF_Output>& outputOps, std::vector<TF_Tensor*>& outputTensors)
+{
+	return runSession(
+		graph,
+		inputOps.data(), inputTensors.data(), inputTensors.size(),
+		outputOps.data(), outputTensors.data(), outputTensors.size());
+}
+
+bool runSession(TF_Session* sess,
 	const TF_Output* inputOps, TF_Tensor* const* inputTensors, std::size_t numInputs,
 	const TF_Output* outputOps, TF_Tensor** outputTensors, std::size_t numOutputs)
 {
@@ -197,7 +164,6 @@ bool runSession(
 	}
 
 	TF_Status* status = TF_NewStatus();
-
 	TF_SessionRun(
 		sess,
 		nullptr, // Run options
@@ -215,6 +181,16 @@ bool runSession(
 	}
 
 	return true;
+}
+
+bool runSession(TF_Session* sess,
+	const std::vector<TF_Output>& inputOps, const std::vector<TF_Tensor*>& inputTensors,
+	const std::vector<TF_Output>& outputOps, std::vector<TF_Tensor*>& outputTensors)
+{
+	return runSession(
+		sess,
+		inputOps.data(), inputTensors.data(), inputTensors.size(),
+		outputOps.data(), outputTensors.data(), outputTensors.size());
 }
 
 // --------------------------------------------------------
@@ -251,7 +227,7 @@ TF_Tensor* createTensor(
 	return tensor;
 }
 
-void DeleteTensor(TF_Tensor* tensor)
+void deleteTensor(TF_Tensor* tensor)
 {
 	if (tensor == nullptr)
 	{
@@ -259,6 +235,14 @@ void DeleteTensor(TF_Tensor* tensor)
 		return;
 	}
 	TF_DeleteTensor(tensor);
+}
+
+void deleteTensors(const std::vector<TF_Tensor*>& tensors)
+{
+	for (auto& e : tensors)
+	{
+		deleteTensor(e);
+	}
 }
 
 } // namespace tfutils

@@ -4,7 +4,7 @@ namespace tfutils
 {
 
 // --------------------------------------------------------
-// Graph info
+// Common
 // --------------------------------------------------------
 const char* TFDataTypeToString(TF_DataType dataType)
 {
@@ -61,6 +61,9 @@ const char* TFDataTypeToString(TF_DataType dataType)
 	}
 }
 
+// --------------------------------------------------------
+// Graph info
+// --------------------------------------------------------
 void printOpInputs(TF_Graph*, TF_Operation* op)
 {
 	const int numInputs = TF_OperationNumInputs(op);
@@ -142,6 +145,83 @@ void printOp(TF_Graph* graph)
 
 		std::cout << std::endl;
 	}
+}
+
+
+// --------------------------------------------------------
+// Tensor info
+// --------------------------------------------------------
+void printTensorInputs(TF_Graph*, TF_Operation* op)
+{
+	const int numInputs = TF_OperationNumInputs(op);
+
+	for (int i = 0; i < numInputs; i++)
+	{
+		const TF_Input input = { op, i };
+		const TF_DataType type = TF_OperationInputType(input);
+		std::cout << "Input: " << i << " type: " << TFDataTypeToString(type) << std::endl;
+	}
+}
+
+void printTensorOutputs(TF_Graph* graph, TF_Operation* op)
+{
+	const int numOutputs = TF_OperationNumOutputs(op);
+	TF_Status *status = TF_NewStatus();
+
+	for (int i = 0; i < numOutputs; i++)
+	{
+		const TF_Output output = { op, i };
+		const TF_DataType type = TF_OperationOutputType(output);
+		const int numDims = TF_GraphGetTensorNumDims(graph, output, status);
+		
+		if (TF_GetCode(status) != TF_OK)
+		{
+			std::cout << "Error : Can't get tensor dimensionality" << std::endl;
+			continue;
+		}
+
+		std::vector<std::int64_t> dims(numDims);
+		std::cout << "Output: " << i << " type: " << TFDataTypeToString(type);
+		TF_GraphGetTensorShape(graph, output, dims.data(), numDims, status);
+
+		if (TF_GetCode(status) != TF_OK)
+		{
+			std::cout << "Error: Can't get get tensor shape" << std::endl;
+			continue;
+		}
+
+		std::cout << " dims: " << numDims << " [";
+		for (int d = 0; d < numDims; d++)
+		{
+			std::cout << dims[d];
+			if (d < numDims - 1)
+			{
+				std::cout << ", ";
+			}
+		}
+		std::cout << "]" << std::endl;
+  }
+
+  TF_DeleteStatus(status);
+}
+
+void printTensorInfo(TF_Graph *graph, const char *layerName)
+{
+	std::cout << "Tensor: " << layerName;
+	TF_Operation *op = TF_GraphOperationByName(graph, layerName);
+
+	if (op == nullptr)
+	{
+		std::cout << "Error: Could not get " << layerName << std::endl;
+		return;
+	}
+
+	const int numInputs = TF_OperationNumInputs(op);
+	const int numOutputs = TF_OperationNumOutputs(op);
+	std::cout << " inputs: " << numInputs << " outputs: " << numOutputs << std::endl;
+
+	printTensorInputs(graph, op);
+	printTensorOutputs(graph, op);
 }
 
 } // namespace tfutils

@@ -36,7 +36,7 @@ void TFModel::setup(
 	const std::string& graphPath,
 	const std::string& inputOpName,
 	const std::string& outputOpName,
-	const std::vector<std::int64_t> inputDims)
+	const std::vector<std::int64_t>& inputDims)
 {
 	// Graph
 	mGraph = tfutils::loadGraphDef(graphPath.c_str());
@@ -46,41 +46,58 @@ void TFModel::setup(
 	mSess = tfutils::createSession(mGraph);
 
 	// Operation
-	mInputOp = tfutils::loadOperation(mGraph, inputOpName.c_str());
-	mOutputOp = tfutils::loadOperation(mGraph, outputOpName.c_str());
+	mInputOps = tfutils::loadOperations(mGraph, inputOpName.c_str());
+	mOutputOps = tfutils::loadOperations(mGraph, outputOpName.c_str());
 
+	// Input dimension
 	mInputDims = inputDims;
-	for (const auto& e : mInputDims)
+	
+	// Input Length
+	for (auto& e : mInputDims)
 	{
 		mInputLen *= e;
 	}
 	mInputLen *= sizeof(float);
 }
 
-void TFModel::run(ofFloatImage& inputImg, ofFloatImage& outputImg)
+// --------------------------------------------------------
+// Utils
+// --------------------------------------------------------
+void TFModel::runImgToImg(const std::vector<ofFloatImage>& inputs, std::vector<ofFloatImage>& outputs)
 {
-	TF_Tensor* inputTensor = tfutils::createTensor(
-		TF_FLOAT,
-		mInputDims.data(), mInputDims.size(),
-		inputImg.getPixels().getData(), mInputLen
-	);
-	TF_Tensor* outputTensor = nullptr;
+	std::vector<TF_Tensor*> inputTensors;
+	createTensorFromImg(inputTensors, inputs);
+	std::vector<TF_Tensor*> outputTensors = { nullptr };
 
 	const bool success = tfutils::runSession(
 		mSess,
-		&mInputOp, &inputTensor, 1,
-		&mOutputOp, &outputTensor, 1
+		mInputOps, inputTensors,
+		mOutputOps, outputTensors
 	);
 
-	if (success) tensorToImg(outputTensor, outputImg);
-	else std::cerr << "Error: Can't run session" << std::endl;
+	if (success) tensorToImg(outputTensors, outputs);
 
-	TF_DeleteTensor(inputTensor);
-	TF_DeleteTensor(outputTensor);
+	tfutils::deleteTensors(inputTensors);
+	tfutils::deleteTensors(outputTensors);
 }
 
-void TFModel::tensorToImg(const TF_Tensor* src, ofFloatImage& dst)
+void TFModel::tensorToImg(const std::vector<TF_Tensor*>& tensors, std::vector<ofFloatImage>& imgs)
 {
-	auto data = static_cast<float*>(TF_TensorData(src));
-	dst.setFromPixels(data, dst.getWidth(), dst.getHeight(), dst.getImageType(), true);
+	const std::vector<std::vector<float>> data = tfutils::tensorData<float>(tensors);
+
+	if (imgs.size() != 1)
+	{
+		std::cerr << "Warning: You have to specify the index of output tensors" << std::endl;
+	}
+
+	imgs[0].setFromPixels(data[0].data(), imgs[0].getWidth(), imgs[0].getHeight(), imgs[0].getImageType(), true);
+}
+
+void TFModel::createTensorFromImg(std::vector<TF_Tensor*>& tensors, const std::vector<ofFloatImage>& imgs)
+{
+	std::vector<float> inputBuffer;
+	inputBuffer.resize(mInputLen / sizeof(float));
+	std::memcpy(inputBuffer.data(), imgs[0].getPixels().getData(), mInputLen);
+
+	tensors = { tfutils::createTensor(TF_FLOAT, mInputDims.data(), mInputDims.size(), inputBuffer.data(), mInputLen) };
 }
