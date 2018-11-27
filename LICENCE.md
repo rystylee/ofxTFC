@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2018 Ryosuke Nakajima
+Copyright (c) 2018 rystylee
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
