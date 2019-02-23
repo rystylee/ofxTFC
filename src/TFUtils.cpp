@@ -53,7 +53,7 @@ namespace tfutils
         TF_Buffer* buffer = readBufferFromFile(graphName);
         if (buffer == nullptr)
         {
-            std::cerr << "Error: Can't read buffer from file" << std::endl;
+            std::cerr << "Error: Can't read buffer from file: [" << graphName << "]" << std::endl;
             return nullptr;
         }
     
@@ -67,14 +67,14 @@ namespace tfutils
     
         if (TF_GetCode(status) != TF_OK)
         {
-            std::cerr << "Error: Can't load GraphDef" << std::endl;
+            std::cerr << "Error: Can't load GraphDef: [" << graphName << "]" << std::endl;
             TF_DeleteGraph(graph);
             graph = nullptr;
         }
     
         TF_DeleteStatus(status);
     
-        std::cout << "Successfully load GraphDef" << std::endl;
+        std::cout << "Successfully load GraphDef: [" << graphName << "]" << std::endl;
         
         return graph;
     }
@@ -86,11 +86,11 @@ namespace tfutils
         {
             if (e.oper == nullptr)
             {
-                std::cerr << "Error: Can't initialize inputOperation" << std::endl;
+                std::cerr << "Error: Can't initialize inputOperation: [" << opName << "]" << std::endl;
             }
         }
     
-        std::cout << "Successfully load GraphOperation" << std::endl;
+        std::cout << "Successfully load GraphOperation: [" << opName << "]" << std::endl;
     
         return ops;
     }
@@ -237,7 +237,7 @@ namespace tfutils
         TF_DeleteTensor(tensor);
     }
     
-    void deleteTensors(const std::vector<TF_Tensor*>& tensors)
+    void deleteTensors(std::vector<TF_Tensor*>& tensors)
     {
         for (auto& e : tensors)
         {

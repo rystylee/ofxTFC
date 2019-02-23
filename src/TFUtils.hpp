@@ -65,7 +65,7 @@ namespace tfutils
     }
     
     void deleteTensor(TF_Tensor* tensor);
-    void deleteTensors(const std::vector<TF_Tensor*>& tensor);
+    void deleteTensors(std::vector<TF_Tensor*>& tensor);
     
     template<typename T>
     std::vector<T> tensorData(const TF_Tensor* tensor)

@@ -6,30 +6,24 @@
 class ofApp : public ofBaseApp
 {
 public:
-    void setup();
+    void setup();    
     void update();
     void draw();
-    void keyPressed(int key);
-
-    void updateZ();
-    void randomizeInput();
-
+        
+private:
     vector<ofFloatImage> mInputImg;
     vector<ofFloatImage> mOutputImg;
 
-    unique_ptr<float[]> mZ;
-    unique_ptr<float[]> mTargetZ;
-
     ofDirectory mGraphPath;
-    TFModel mModel;
 
-    const int mBatchSize { 1 };
-    const glm::vec2 mGANResolution { 128, 128 };
+    // ofxTFC
+    TFModel mZebra2HorseModel;
+    TFModel mHorse2ZebraModel;
 
-    const string mInputOpName { "z" };
-    const string mOutputOpName { "generator_1/Tanh" };
-    const vector<int64_t> mInputDims { mBatchSize, 100 };
-
+    const string mInputOpName { "input_image" };
+    const string mOutputOpName { "F_7/output/Tanh" };
+    const vector<int64_t> mInputDims { 256, 256, 3 };
+    
     const glm::vec2 mModelInputRange { -1.0, 1.0 };
     const glm::vec2 mModelOutputRange { -1.0, 1.0 };
 
