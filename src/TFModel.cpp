@@ -32,20 +32,23 @@ TFModel::~TFModel()
     TF_DeleteStatus(status);
 }
 
-void TFModel::setup(
+void TFModel::init(
     const std::string& graphPath,
     const std::string& inputOpName,
     const std::string& outputOpName,
     const std::vector<std::int64_t>& inputDims,
     const glm::vec2& modelInputRange,
-    const glm::vec2& modelOutputRange)
+    const glm::vec2& modelOutputRange,
+    const tfutils::SessionConfigType& sessionConfigType
+)
 {
     // Graph
     mGraph = tfutils::loadGraphDef(graphPath.c_str());
     if (mGraph == nullptr) return;
 
     // Session
-    mSess = tfutils::createSession(mGraph);
+    //mSess = tfutils::createSession(mGraph, tfutils::SessionConfigType::ALLOW_GROWTH);
+    mSess = tfutils::createSession(mGraph, sessionConfigType);
 
     // Operation
     mInputOps = tfutils::loadOperations(mGraph, inputOpName.c_str());

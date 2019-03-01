@@ -17,13 +17,14 @@ public:
     TFModel();
     ~TFModel();
     
-    void setup(
+    void init(
         const std::string& graphPath,
         const std::string& inputOpName,
         const std::string& outputOpName,
         const std::vector<std::int64_t>& inputDims,
         const glm::vec2& modelInputRange,
-        const glm::vec2& modelOutputRange);
+        const glm::vec2& modelOutputRange,
+        const tfutils::SessionConfigType& sessionConfigType = tfutils::SessionConfigType::NONE);
 
     void runImgToImg(const std::vector<ofFloatImage>& inputs, std::vector<ofFloatImage>& outputs, const glm::vec2& imageInputRange, const glm::vec2& imageOutputRange);
     //void runVecToImg(const std::vector<std::vector<float>>& inputs, std::vector<ofFloatImage>& outputs);

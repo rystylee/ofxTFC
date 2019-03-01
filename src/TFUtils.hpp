@@ -17,7 +17,6 @@
 
 namespace tfutils
 {
-
     // --------------------------------------------------------
     // Graph
     // --------------------------------------------------------
@@ -29,7 +28,14 @@ namespace tfutils
     // --------------------------------------------------------
     // Session
     // --------------------------------------------------------
-    TF_Session* createSession(TF_Graph* graph);
+    enum class SessionConfigType
+    {
+        NONE,
+        PER_PROCESS_GPU_MEMORY_FRACTION_05,
+        ALLOW_GROWTH,
+    };
+
+    TF_Session* createSession(TF_Graph* graph, SessionConfigType sessionConfigType = SessionConfigType::NONE);
     
     bool runSession(TF_Graph* graph,
                     const TF_Output* inputOps, TF_Tensor* const* inputTensors, std::size_t numInputs,

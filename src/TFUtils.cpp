@@ -98,7 +98,7 @@ namespace tfutils
     // --------------------------------------------------------
     // Session
     // --------------------------------------------------------
-    TF_Session* createSession(TF_Graph* graph)
+    TF_Session* createSession(TF_Graph* graph, SessionConfigType sessionConfigType)
     {
         if (graph == nullptr)
         {
@@ -108,6 +108,27 @@ namespace tfutils
     
         TF_Status* status = TF_NewStatus();
         TF_SessionOptions* options = TF_NewSessionOptions();
+        switch (sessionConfigType)
+        {
+            case SessionConfigType::PER_PROCESS_GPU_MEMORY_FRACTION_05:
+            {
+                // tf.GPUOptions(per_process_gpu_memory_fraction=0.5)
+                uint8_t config[11] = { 0x32, 0x09, 0x09, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xe0, 0x3f };
+                TF_SetConfig(options, (void*)config, 11, status);
+                break;
+            }
+            case SessionConfigType::ALLOW_GROWTH:
+            {
+                // tf.GPUOptions(allow_growth=True)
+                uint8_t config[4] = { 0x32, 0x2, 0x20, 0x1 };
+                TF_SetConfig(options, (void*)config, 4, status);
+                break;
+            }
+            default:
+            {
+                break;
+            }
+        }
         TF_Session* sess = TF_NewSession(graph, options, status);
     
         TF_DeleteSessionOptions(options);
