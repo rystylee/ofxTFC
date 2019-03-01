@@ -6,8 +6,7 @@ void ofApp::setup()
     ofSetBackgroundColor(0);
 
     mGraphPath.listDir("models");
-
-    mModel.setup(ofFilePath::getAbsolutePath(mGraphPath.getPath(0)), mInputOpName, mOutputOpName, mInputDims, mModelInputRange, mModelOutputRange);
+    mModel.init(ofFilePath::getAbsolutePath(mGraphPath.getPath(0)), mInputOpName, mOutputOpName, mInputDims, mModelInputRange, mModelOutputRange);
 
     ofFloatImage inputImg;
     inputImg.allocate(mBatchSize, 100, OF_IMAGE_GRAYSCALE);

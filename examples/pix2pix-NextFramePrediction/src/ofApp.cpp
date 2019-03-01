@@ -6,13 +6,10 @@ void ofApp::setup()
     ofSetBackgroundColor(0);
 
     mGraphPath.listDir("models");
-
-    mModel.setup(ofFilePath::getAbsolutePath(mGraphPath.getPath(0)), mInputOpName, mOutputOpName, mInputDims, mModelInputRange, mModelOutputRange);
-    //string modelPath = "models/PRAY_STATE.pb";
-    //mModel.setup(ofFilePath::getAbsolutePath(modelPath), mInputOpName, mOutputOpName, mInputDims);
+    mModel.init(ofFilePath::getAbsolutePath(mGraphPath.getPath(0)), mInputOpName, mOutputOpName, mInputDims, mModelInputRange, mModelOutputRange);
 
     ofFloatImage inputImg;
-    inputImg.load("images/src.png");
+    inputImg.allocate(mInputDims[1], mInputDims[2], OF_IMAGE_COLOR);
     mInputImg.push_back(inputImg);
 
     ofFloatImage outputImg;
@@ -30,9 +27,7 @@ void ofApp::update()
 void ofApp::draw()
 {
     mModel.runImgToImg(mInputImg, mOutputImg, mImageInputRange, mImageOutputRange);
-    
     mOutputImg[0].draw(glm::vec2(0, 0), ofGetWidth(), ofGetHeight());
-
     std::swap(mInputImg, mOutputImg);
 }
 

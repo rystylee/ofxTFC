@@ -7,13 +7,10 @@ void ofApp::setup()
 
     mGraphPath.listDir("models");
 
-    //mModel.setup(ofFilePath::getAbsolutePath(mGraphPath.getPath(0)), mInputOpName, mOutputOpName, mInputDims, mModelInputRange, mModelOutputRange);
     string modelPath = "models/horse2zebra.pb";
-    //string modelPath = "models/apple2orange.pb";
-    mHorse2ZebraModel.setup(ofFilePath::getAbsolutePath(modelPath), mInputOpName, "G_7/output/Tanh", mInputDims, mModelInputRange, mModelOutputRange);
+    mHorse2ZebraModel.init(ofFilePath::getAbsolutePath(modelPath), mInputOpName, "G_7/output/Tanh", mInputDims, mModelInputRange, mModelOutputRange);
     modelPath = "models/zebra2horse.pb";
-    //modelPath = "models/orange2apple.pb";
-    mZebra2HorseModel.setup(ofFilePath::getAbsolutePath(modelPath), mInputOpName, mOutputOpName, mInputDims, mModelInputRange, mModelOutputRange);
+    mZebra2HorseModel.init(ofFilePath::getAbsolutePath(modelPath), mInputOpName, mOutputOpName, mInputDims, mModelInputRange, mModelOutputRange);
 
     ofFloatImage inputImg;
     inputImg.load("images/src.jpg");
@@ -38,12 +35,7 @@ void ofApp::draw()
     else
         mZebra2HorseModel.runImgToImg(mOutputImg, mInputImg, mImageInputRange, mImageOutputRange);
 
-    //mHorse2ZebraModel.runImgToImg(mInputImg, mOutputImg, mImageInputRange, mImageOutputRange);
-    //mZebra2HorseModel.runImgToImg(mInputImg, mOutputImg, mImageInputRange, mImageOutputRange);
-    
     mOutputImg[0].draw(glm::vec2(0, 0), ofGetWidth(), ofGetHeight());
-
-    //std::swap(mInputImg, mOutputImg);
 }
 
 //--------------------------------------------------------------
