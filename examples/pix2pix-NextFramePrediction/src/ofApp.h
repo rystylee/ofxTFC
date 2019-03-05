@@ -11,8 +11,8 @@ public:
     void draw();
         
 private:
-    vector<ofFloatImage> mInputImg;
-    vector<ofFloatImage> mOutputImg;
+    vector<ofFloatImage> mInputImgs;
+    vector<ofFloatImage> mOutputImgs;
 
     ofDirectory mGraphPath;
 
@@ -21,6 +21,7 @@ private:
 
     const string mInputOpName { "generator/generator_inputs" };
     const string mOutputOpName { "generator/generator_outputs" };
+    const int mBatchSize { 1 };
     const vector<int64_t> mInputDims { 1, 256, 256, 3 };
     
     const glm::vec2 mModelInputRange { -1.0, 1.0 };

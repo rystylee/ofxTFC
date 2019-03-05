@@ -22,7 +22,7 @@ namespace tfutils
     // --------------------------------------------------------
     TF_Graph* loadGraphDef(const char* graphName);
     
-    //TF_Output loadOperation(TF_Graph* graph, const char* opName);
+    TF_Output loadOperation(TF_Graph* graph, const char* opName);
     const std::vector<TF_Output> loadOperations(TF_Graph* graph, const char* opName);
     
     // --------------------------------------------------------

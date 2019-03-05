@@ -81,17 +81,19 @@ namespace tfutils
     
     const std::vector<TF_Output> loadOperations(TF_Graph* graph, const char* opName)
     {
-        std::vector<TF_Output> ops = { { TF_GraphOperationByName(graph, opName), 0 } };
-        for (const auto& e : ops)
+        std::vector<TF_Output> ops = { loadOperation(graph, opName) };
+        return ops;
+    }
+    
+    TF_Output loadOperation(TF_Graph* graph, const char* opName)
+    {
+        TF_Output ops = { TF_GraphOperationByName(graph, opName), 0 };
+        if (ops.oper == nullptr)
         {
-            if (e.oper == nullptr)
-            {
-                std::cerr << "Error: Can't initialize inputOperation: [" << opName << "]" << std::endl;
-            }
+            std::cerr << "Error: Can't initialize inputOperation: [" << opName << "]" << std::endl;
         }
-    
+
         std::cout << "Successfully load GraphOperation: [" << opName << "]" << std::endl;
-    
         return ops;
     }
     

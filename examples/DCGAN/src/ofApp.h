@@ -13,12 +13,13 @@ public:
 
     void updateZ();
     void randomizeInput();
+    void automate(const float timescale);
 
-    vector<ofFloatImage> mInputImg;
-    vector<ofFloatImage> mOutputImg;
+    vector<ofFloatImage> mInputImgs;
+    vector<ofFloatImage> mOutputImgs;
 
-    unique_ptr<float[]> mZ;
-    unique_ptr<float[]> mTargetZ;
+    vector<vector<float>> mZ;
+    vector<vector<float>> mTargetZ;
 
     ofDirectory mGraphPath;
     TFModel mModel;
@@ -28,7 +29,7 @@ public:
 
     const string mInputOpName { "z" };
     const string mOutputOpName { "generator_1/Tanh" };
-    const vector<int64_t> mInputDims { mBatchSize, 100 };
+    const vector<int64_t> mInputDims { static_cast<int64_t>(mBatchSize), 100 };
 
     const glm::vec2 mModelInputRange { -1.0, 1.0 };
     const glm::vec2 mModelOutputRange { -1.0, 1.0 };

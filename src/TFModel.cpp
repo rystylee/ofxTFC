@@ -36,6 +36,7 @@ void TFModel::init(
     const std::string& graphPath,
     const std::string& inputOpName,
     const std::string& outputOpName,
+    const int batchSize,
     const std::vector<std::int64_t>& inputDims,
     const glm::vec2& modelInputRange,
     const glm::vec2& modelOutputRange,
@@ -47,15 +48,17 @@ void TFModel::init(
     if (mGraph == nullptr) return;
 
     // Session
-    //mSess = tfutils::createSession(mGraph, tfutils::SessionConfigType::ALLOW_GROWTH);
     mSess = tfutils::createSession(mGraph, sessionConfigType);
+
+    // Batch size
+    mBatchSize = batchSize;
+
+    // Input dimension
+    mInputDims = inputDims;
 
     // Operation
     mInputOps = tfutils::loadOperations(mGraph, inputOpName.c_str());
     mOutputOps = tfutils::loadOperations(mGraph, outputOpName.c_str());
-
-    // Input dimension
-    mInputDims = inputDims;
 
     // Model input/output range
     mModelInputRange = modelInputRange;
@@ -67,15 +70,18 @@ void TFModel::init(
         mInputLen *= e;
     }
     mInputLen *= sizeof(float);
+
+    // Input BytesNum
+    mInputBytesNum = (mInputLen / static_cast<size_t>(mBatchSize) / sizeof(float));
 }
 
 // --------------------------------------------------------
 // Utils
 // --------------------------------------------------------
-void TFModel::runImgToImg(const std::vector<ofFloatImage>& inputs, std::vector<ofFloatImage>& outputs, const glm::vec2& imageInputRange, const glm::vec2& imageOutputRange)
+void TFModel::runImgsToImgs(const std::vector<ofFloatImage>& inputs, std::vector<ofFloatImage>& outputs, const glm::vec2& imageInputRange, const glm::vec2& imageOutputRange)
 {
     std::vector<TF_Tensor*> inputTensors;
-    imgToTensor(inputTensors, inputs, imageInputRange);
+    imgsToTensors(inputTensors, inputs, imageInputRange);
     std::vector<TF_Tensor*> outputTensors = { nullptr };
 
     const bool success = tfutils::runSession(
@@ -84,42 +90,122 @@ void TFModel::runImgToImg(const std::vector<ofFloatImage>& inputs, std::vector<o
         mOutputOps, outputTensors
     );
 
-    if (success) tensorToImg(outputTensors, outputs, imageOutputRange);
+    if (success) tensorsToImgs(outputTensors, outputs, imageOutputRange);
 
     tfutils::deleteTensors(inputTensors);
     tfutils::deleteTensors(outputTensors);
 }
 
-void TFModel::imgToTensor(std::vector<TF_Tensor*>& tensors, const std::vector<ofFloatImage>& imgs, const glm::vec2& imageInputRange)
+void TFModel::runFbosToImgs(const std::vector<ofFbo>& inputs, std::vector<ofFloatImage>& outputs, const glm::vec2& imageInputRange, const glm::vec2& imageOutputRange)
 {
-    std::vector<float> inputBuffer;
-    inputBuffer.resize(mInputLen / sizeof(float));
-    std::memcpy(inputBuffer.data(), imgs[0].getPixels().getData(), mInputLen);
+    std::vector<TF_Tensor*> inputTensors;
+    fbosToTensors(inputTensors, inputs, imageInputRange);
+    std::vector<TF_Tensor*> outputTensors = { nullptr };
 
-    for (auto& buffer : inputBuffer)
-    {
-        buffer = tfutils::map(buffer, imageInputRange.x, imageInputRange.y, mModelInputRange.x, mModelInputRange.y);
-    }
+    const bool success = tfutils::runSession(
+        mSess,
+        mInputOps, inputTensors,
+        mOutputOps, outputTensors
+    );
 
-    tensors = { tfutils::createTensor(TF_FLOAT, mInputDims.data(), mInputDims.size(), inputBuffer.data(), mInputLen) };
+    if (success) tensorsToImgs(outputTensors, outputs, imageOutputRange);
+
+    tfutils::deleteTensors(inputTensors);
+    tfutils::deleteTensors(outputTensors);
 }
 
-void TFModel::tensorToImg(const std::vector<TF_Tensor*>& tensors, std::vector<ofFloatImage>& imgs, const glm::vec2& imageOutputRange)
+void TFModel::runFbosToFbos(const std::vector<ofFbo>& inputs, std::vector<ofFbo>& outputs, const glm::vec2& fboInputRange, const glm::vec2& fboOutputRange)
 {
+    std::vector<TF_Tensor*> inputTensors;
+	fbosToTensors(inputTensors, inputs, fboInputRange);
+    std::vector<TF_Tensor*> outputTensors = { nullptr };
+
+    const bool success = tfutils::runSession(
+        mSess,
+        mInputOps, inputTensors,
+        mOutputOps, outputTensors
+    );
+
+    if (success) tensorsToFbos(outputTensors, outputs, fboOutputRange);
+
+    tfutils::deleteTensors(inputTensors);
+    tfutils::deleteTensors(outputTensors);
+}
+
+void TFModel::imgsToTensors(std::vector<TF_Tensor*>& tensors, const std::vector<ofFloatImage>& imgs, const glm::vec2& imageInputRange)
+{
+    // At this time, tensors.size() is always 1
+    std::vector<float> inputBuffer;
+    inputBuffer.resize(mInputLen / sizeof(float));
+    size_t offset = 0;
+    for (const auto& img : imgs)
+    {
+        std::vector<float> buffer;
+        buffer.resize(mInputBytesNum);
+        std::memcpy(buffer.data(), img.getPixels().getData(), mInputBytesNum * sizeof(float));
+        tfutils::map(buffer, imageInputRange.x, imageInputRange.y, mModelInputRange.x, mModelInputRange.y);
+        inputBuffer.insert(inputBuffer.begin() + offset, buffer.begin(), buffer.end());
+        offset += mInputBytesNum;
+    }
+    tensors.emplace_back( tfutils::createTensor(TF_FLOAT, mInputDims.data(), mInputDims.size(), inputBuffer.data(), mInputLen) );
+}
+
+void TFModel::fbosToTensors(std::vector<TF_Tensor*>& tensors, const std::vector<ofFbo>& fbos, const glm::vec2& fboInputRange)
+{
+    // At this time, tensors.size() is always 1
+    std::vector<float> inputBuffer;
+    inputBuffer.resize(mInputLen / sizeof(float));
+    size_t offset = 0;
+    for (const auto& fbo : fbos)
+    {
+        ofFloatImage img;
+        fbo.readToPixels(img.getPixels());
+        std::vector<float> buffer;
+        buffer.resize(mInputBytesNum);
+        std::memcpy(buffer.data(), img.getPixels().getData(), mInputBytesNum * sizeof(float));
+        tfutils::map(buffer, fboInputRange.x, fboInputRange.y, mModelInputRange.x, mModelInputRange.y);
+        inputBuffer.insert(inputBuffer.begin() + offset, buffer.begin(), buffer.end());
+        offset += mInputBytesNum;
+    }
+    tensors.emplace_back( tfutils::createTensor(TF_FLOAT, mInputDims.data(), mInputDims.size(), inputBuffer.data(), mInputLen) );
+}
+
+void TFModel::tensorsToImgs(const std::vector<TF_Tensor*>& tensors, std::vector<ofFloatImage>& imgs, const glm::vec2& imageOutputRange)
+{
+    // At this time, data.size() is always 1
     std::vector<std::vector<float>> data = tfutils::tensorData<float>(tensors);
 
-    if (imgs.size() != 1)
-    {
-        std::cerr << "Warning: You have to specify the index of output tensors" << std::endl;
-    }
+    tfutils::map(data, mModelOutputRange.x, mModelOutputRange.y, imageOutputRange.x, imageOutputRange.y);
 
-    for (auto& batch : data)
+    const size_t bytesNum = static_cast<size_t>(imgs[0].getWidth() * imgs[0].getHeight() * 3);
+    size_t offset = 0;
+    for (auto& img : imgs)
     {
-        for (auto& d : batch)
-        {
-            d = tfutils::map(d, mModelOutputRange.x, mModelOutputRange.y, imageOutputRange.x, imageOutputRange.y);
-        }
+        std::vector<float> d;
+        d.resize(bytesNum);
+        d.insert(d.begin(), data[0].begin() + offset, data[0].begin() + offset + bytesNum);
+        img.setFromPixels(d.data(), img.getWidth(), img.getHeight(), img.getImageType(), true);
+        offset += bytesNum;
     }
+}
 
-    imgs[0].setFromPixels(data[0].data(), imgs[0].getWidth(), imgs[0].getHeight(), imgs[0].getImageType(), true);
+void TFModel::tensorsToFbos(const std::vector<TF_Tensor*>& tensors, std::vector<ofFbo>& fbos, const glm::vec2& fboOutputRange)
+{
+    // At this time, data.size() is always 1
+    std::vector<std::vector<float>> data = tfutils::tensorData<float>(tensors);
+
+    tfutils::map(data, mModelOutputRange.x, mModelOutputRange.y, fboOutputRange.x, fboOutputRange.y);
+
+    const size_t bytesNum = static_cast<size_t>(fbos[0].getWidth() * fbos[0].getHeight() * 3);
+    size_t offset = 0;
+    for (auto& fbo : fbos)
+    {
+        std::vector<float> d;
+        d.resize(bytesNum);
+        d.insert(d.begin(), data[0].begin() + offset, data[0].begin() + offset + bytesNum);
+        ofFloatPixels pix;
+        pix.setFromPixels(d.data(), fbo.getWidth(), fbo.getHeight(), OF_IMAGE_COLOR);
+        fbo.getTexture().loadData(pix, GL_RGB);
+        offset += bytesNum;
+    }
 }
