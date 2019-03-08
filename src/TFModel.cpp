@@ -117,7 +117,7 @@ void TFModel::runFbosToImgs(const std::vector<ofFbo>& inputs, std::vector<ofFloa
 void TFModel::runFbosToFbos(const std::vector<ofFbo>& inputs, std::vector<ofFbo>& outputs, const glm::vec2& fboInputRange, const glm::vec2& fboOutputRange)
 {
     std::vector<TF_Tensor*> inputTensors;
-	fbosToTensors(inputTensors, inputs, fboInputRange);
+    fbosToTensors(inputTensors, inputs, fboInputRange);
     std::vector<TF_Tensor*> outputTensors = { nullptr };
 
     const bool success = tfutils::runSession(
@@ -127,6 +127,24 @@ void TFModel::runFbosToFbos(const std::vector<ofFbo>& inputs, std::vector<ofFbo>
     );
 
     if (success) tensorsToFbos(outputTensors, outputs, fboOutputRange);
+
+    tfutils::deleteTensors(inputTensors);
+    tfutils::deleteTensors(outputTensors);
+}
+
+void TFModel::runVecsToImgs(const std::vector<std::vector<float>>& inputs, std::vector<ofFloatImage>& outputs, const glm::vec2& imageInputRange, const glm::vec2& imageOutputRange)
+{
+    std::vector<TF_Tensor*> inputTensors;
+    vecsToTensors(inputTensors, inputs, imageInputRange);
+    std::vector<TF_Tensor*> outputTensors = { nullptr };
+
+    const bool success = tfutils::runSession(
+        mSess,
+        mInputOps, inputTensors,
+        mOutputOps, outputTensors
+    );
+
+    if (success) tensorsToImgs(outputTensors, outputs, imageOutputRange);
 
     tfutils::deleteTensors(inputTensors);
     tfutils::deleteTensors(outputTensors);
@@ -164,6 +182,24 @@ void TFModel::fbosToTensors(std::vector<TF_Tensor*>& tensors, const std::vector<
         buffer.resize(mInputBytesNum);
         std::memcpy(buffer.data(), img.getPixels().getData(), mInputBytesNum * sizeof(float));
         tfutils::map(buffer, fboInputRange.x, fboInputRange.y, mModelInputRange.x, mModelInputRange.y);
+        inputBuffer.insert(inputBuffer.begin() + offset, buffer.begin(), buffer.end());
+        offset += mInputBytesNum;
+    }
+    tensors.emplace_back( tfutils::createTensor(TF_FLOAT, mInputDims.data(), mInputDims.size(), inputBuffer.data(), mInputLen) );
+}
+
+void TFModel::vecsToTensors(std::vector<TF_Tensor*>& tensors, const std::vector<std::vector<float>>& vecs, const glm::vec2& vecInputRange)
+{
+    // At this time, tensors.size() is always 1
+    std::vector<float> inputBuffer;
+    inputBuffer.resize(mInputLen / sizeof(float));
+    size_t offset = 0;
+    for (const auto& vec : vecs)
+    {
+        std::vector<float> buffer;
+        buffer.resize(mInputBytesNum);
+        std::memcpy(buffer.data(), vec.data(), mInputBytesNum * sizeof(float));
+        tfutils::map(buffer, vecInputRange.x, vecInputRange.y, mModelInputRange.x, mModelInputRange.y);
         inputBuffer.insert(inputBuffer.begin() + offset, buffer.begin(), buffer.end());
         offset += mInputBytesNum;
     }

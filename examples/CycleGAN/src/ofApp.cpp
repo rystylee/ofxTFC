@@ -4,13 +4,14 @@
 void ofApp::setup()
 {
     ofSetBackgroundColor(0);
+    ofSetVerticalSync(false);
 
     mGraphPath.listDir("models");
 
     string modelPath = "models/horse2zebra.pb";
-    mHorse2ZebraModel.init(ofFilePath::getAbsolutePath(modelPath), mInputOpName, "G_7/output/Tanh", mBatchSize, mInputDims, mModelInputRange, mModelOutputRange);
+    mX2YModel.init(ofFilePath::getAbsolutePath(modelPath), mInputOpName, mX2YOutputOpName, mBatchSize, mInputDims, mModelInputRange, mModelOutputRange);
     modelPath = "models/zebra2horse.pb";
-    mZebra2HorseModel.init(ofFilePath::getAbsolutePath(modelPath), mInputOpName, mOutputOpName, mBatchSize, mInputDims, mModelInputRange, mModelOutputRange);
+    mY2XModel.init(ofFilePath::getAbsolutePath(modelPath), mInputOpName, mY2XOutputOpName, mBatchSize, mInputDims, mModelInputRange, mModelOutputRange);
 
     ofFloatImage inputImg;
     inputImg.load("images/src.jpg");
@@ -31,9 +32,9 @@ void ofApp::update()
 void ofApp::draw()
 {
     if (ofGetFrameNum() % 2 == 0)
-        mHorse2ZebraModel.runImgsToImgs(mInputImgs, mOutputImgs, mImageInputRange, mImageOutputRange);
+        mX2YModel.runImgsToImgs(mInputImgs, mOutputImgs, mImageInputRange, mImageOutputRange);
     else
-        mZebra2HorseModel.runImgsToImgs(mOutputImgs, mInputImgs, mImageInputRange, mImageOutputRange);
+        mY2XModel.runImgsToImgs(mOutputImgs, mInputImgs, mImageInputRange, mImageOutputRange);
 
     mOutputImgs[0].draw(glm::vec2(0, 0), ofGetWidth(), ofGetHeight());
 }

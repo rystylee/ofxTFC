@@ -30,6 +30,7 @@ public:
     void runImgsToImgs(const std::vector<ofFloatImage>& inputs, std::vector<ofFloatImage>& outputs, const glm::vec2& imageInputRange, const glm::vec2& imageOutputRange);
     void runFbosToImgs(const std::vector<ofFbo>& inputs, std::vector<ofFloatImage>& outputs, const glm::vec2& imageInputRange, const glm::vec2& imageOutputRange);
     void runFbosToFbos(const std::vector<ofFbo>& inputs, std::vector<ofFbo>& outputs, const glm::vec2& fboInputRange, const glm::vec2& fboOutputRange);
+    void runVecsToImgs(const std::vector<std::vector<float>>& inputs, std::vector<ofFloatImage>& outputs, const glm::vec2& imageInputRange, const glm::vec2& imageOutputRange);
 
     // Getter
     TF_Graph* getGraph() { return mGraph; }
@@ -37,6 +38,7 @@ public:
     // Utils
     void imgsToTensors(std::vector<TF_Tensor*>& tensors, const std::vector<ofFloatImage>& imgs, const glm::vec2& imageInputRange);
     void fbosToTensors(std::vector<TF_Tensor*>& tensors, const std::vector<ofFbo>& fbos, const glm::vec2& fboInputRange);
+    void vecsToTensors(std::vector<TF_Tensor*>& tensors, const std::vector<std::vector<float>>& vecs, const glm::vec2& vecInputRange);
     void tensorsToImgs(const std::vector<TF_Tensor*>& tensors, std::vector<ofFloatImage>& imgs, const glm::vec2& imageOutputRange);
     void tensorsToFbos(const std::vector<TF_Tensor*>& tensors, std::vector<ofFbo>& fbos, const glm::vec2& fboOutputRange);
     void printOpInfo() { tfutils::printOp(mGraph); }

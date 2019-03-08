@@ -4,6 +4,7 @@
 void ofApp::setup()
 {
     ofSetBackgroundColor(0);
+    ofSetVerticalSync(false);
 
     mGraphPath.listDir("models");
     mModel.init(ofFilePath::getAbsolutePath(mGraphPath.getPath(0)), mInputOpName, mOutputOpName, mBatchSize ,mInputDims, mModelInputRange, mModelOutputRange);
@@ -15,6 +16,8 @@ void ofApp::setup()
     ofFloatImage outputImg;
     outputImg.allocate(mInputDims[1], mInputDims[2], OF_IMAGE_COLOR);
     mOutputImgs.push_back(outputImg);
+
+    //mModel.printOpInfo();
 }
 
 //--------------------------------------------------------------

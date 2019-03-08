@@ -1,0 +1,59 @@
+[33mcommit cc89bccfb02d52cf43b86dd78f7b1cd2ef5b303c[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: rystylee <rystylee8@gmail.com>
+Date:   Tue Mar 5 16:28:25 2019 +0900
+
+    Added support for batch processing
+
+[33mcommit 1e8d9d6a80a98aaf5c3c719843fa8fa8c5fc63a2[m
+Author: rystylee <rystylee8@gmail.com>
+Date:   Sat Mar 2 07:48:55 2019 +0900
+
+    Fixed examples
+
+[33mcommit 9c492388d79a7b651a52faecdd718f93b33fb8b5[m
+Author: rystylee <rystylee8@gmail.com>
+Date:   Sat Mar 2 00:53:54 2019 +0900
+
+    Added support for GPUOptions of ConfigProto
+
+[33mcommit 64924880a10b520b8ee74ec0bc58e05e8474a915[m
+Author: rystylee <rystylee8@gmail.com>
+Date:   Sat Feb 23 22:42:01 2019 +0900
+
+    Added CycleGAN example
+
+[33mcommit a7af8513b9489c1e8505b5803fef182a62912a65[m
+Author: rystylee <rystylee8@gmail.com>
+Date:   Sat Feb 23 19:57:51 2019 +0900
+
+    Added map function to adjust a range of values
+
+[33mcommit ab41e0c5e0a6ef2bd28371998dd328e35b27f214[m
+Author: rystylee <rystylee8@gmail.com>
+Date:   Tue Nov 27 10:35:29 2018 +0900
+
+    Updated LICENCE.md
+
+[33mcommit 1b7a29afc1a0387c5f2d1a615f1a0e32322e55c5[m
+Author: rystylee <rystylee8@gmail.com>
+Date:   Sun Nov 25 10:21:47 2018 +0900
+
+    Added DCGAN example
+
+[33mcommit e4b88493f86151aebf188e5ba9bd60f72d45a761[m
+Author: rystylee <rystylee8@gmail.com>
+Date:   Sun Nov 25 09:34:24 2018 +0900
+
+    Added some utility functions for TensorFlow C API
+
+[33mcommit e48fd3fbc66ceb0b4d896342d5d42a373b859e72[m
+Author: rystylee <rystylee8@gmail.com>
+Date:   Fri Nov 23 15:11:06 2018 +0900
+
+    Updated README.md
+
+[33mcommit 88b7ff32d0e830b1e5491486e63cb61aa1991b48[m
+Author: rystylee <rystylee8@gmail.com>
+Date:   Fri Nov 23 14:58:41 2018 +0900
+
+    First commit

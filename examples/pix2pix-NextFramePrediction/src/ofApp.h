@@ -11,13 +11,12 @@ public:
     void draw();
         
 private:
-    vector<ofFloatImage> mInputImgs;
-    vector<ofFloatImage> mOutputImgs;
-
     ofDirectory mGraphPath;
 
-    // ofxTFC
     TFModel mModel;
+
+    vector<ofFloatImage> mInputImgs;
+    vector<ofFloatImage> mOutputImgs;
 
     const string mInputOpName { "generator/generator_inputs" };
     const string mOutputOpName { "generator/generator_outputs" };

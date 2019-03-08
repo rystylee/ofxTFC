@@ -68,14 +68,14 @@ namespace tfutils
         if (TF_GetCode(status) != TF_OK)
         {
             std::cerr << "Error: Can't load GraphDef: [" << graphName << "]" << std::endl;
-            TF_DeleteGraph(graph);
             graph = nullptr;
         }
-    
+        else
+        {
+            std::cout << "Successfully load GraphDef: [" << graphName << "]" << std::endl;
+        }
         TF_DeleteStatus(status);
-    
-        std::cout << "Successfully load GraphDef: [" << graphName << "]" << std::endl;
-        
+
         return graph;
     }
     

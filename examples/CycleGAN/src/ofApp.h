@@ -11,17 +11,16 @@ public:
     void draw();
         
 private:
+    ofDirectory mGraphPath;
+    TFModel mX2YModel;
+    TFModel mY2XModel;
+
     vector<ofFloatImage> mInputImgs;
     vector<ofFloatImage> mOutputImgs;
 
-    ofDirectory mGraphPath;
-
-    // ofxTFC
-    TFModel mZebra2HorseModel;
-    TFModel mHorse2ZebraModel;
-
     const string mInputOpName { "input_image" };
-    const string mOutputOpName { "F_7/output/Tanh" };
+    const string mX2YOutputOpName { "G_7/output/Tanh" };
+    const string mY2XOutputOpName { "F_7/output/Tanh" };
     const int mBatchSize { 1 };
     const vector<int64_t> mInputDims { 256, 256, 3 };
     
