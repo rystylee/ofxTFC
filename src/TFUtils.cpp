@@ -90,10 +90,12 @@ namespace tfutils
         TF_Output ops = { TF_GraphOperationByName(graph, opName), 0 };
         if (ops.oper == nullptr)
         {
-            std::cerr << "Error: Can't initialize inputOperation: [" << opName << "]" << std::endl;
+            std::cerr << "Error: Can't initialize GraphOperation: [" << opName << "]" << std::endl;
         }
-
-        std::cout << "Successfully load GraphOperation: [" << opName << "]" << std::endl;
+        else
+        {
+            std::cout << "Successfully load GraphOperation: [" << opName << "]" << std::endl;
+        }
         return ops;
     }
     

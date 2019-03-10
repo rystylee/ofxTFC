@@ -1,5 +1,8 @@
 #include "TFModel.hpp"
 
+// --------------------------------------------------------
+// Public
+// --------------------------------------------------------
 TFModel::TFModel()
 {
     std::cout << "Tensorflow Version: " << TF_Version() << std::endl;
@@ -76,7 +79,7 @@ void TFModel::init(
 }
 
 // --------------------------------------------------------
-// Utils
+// Private
 // --------------------------------------------------------
 void TFModel::runImgsToImgs(const std::vector<ofFloatImage>& inputs, std::vector<ofFloatImage>& outputs, const glm::vec2& imageInputRange, const glm::vec2& imageOutputRange)
 {
