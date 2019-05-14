@@ -6,13 +6,13 @@ an openFrameworks wrapper for the TensorFlow C API
 ## Examples
 
 ### pix2pix-NextFramePrediction
-![gif](https://i.imgur.com/Rp5KeQp.gif)
+<img src="https://i.imgur.com/YmI54Ai.gif" width="520" />
 
 ### DCGAN
-![gif](https://i.imgur.com/cUDPiHR.gif)
+<img src="https://i.imgur.com/2lF7o4x.gif" width="520" />
 
 ### CycleGAN-feedback
-![gif](https://i.imgur.com/cxnAjwi.gif)
+<img src="https://i.imgur.com/jcEonSh.gif" width="520" />
 
 ### Reference
 
