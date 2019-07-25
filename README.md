@@ -1,7 +1,12 @@
 # ofxTFC
 
-### Description
+## Description
 an openFrameworks wrapper for the TensorFlow C API
+
+## Requirements
+- Windows10
+- tensorflow lib 1.13.1 [you can get from here](https://github.com/Neargye/tensorflow/releases)
+- CUDA10.0
 
 ## Examples
 
