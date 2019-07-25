@@ -5,8 +5,8 @@
 *.pb
 
 ## Images
-*.png
-*.jpg
+# *.png
+# *.jpg
 
 ## windows
 *.obj
